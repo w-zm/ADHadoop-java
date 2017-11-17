@@ -1,3 +1,5 @@
+package cn.edu.wzm;
+
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.UIKeyboardInteractive;
@@ -5,6 +7,10 @@ import com.jcraft.jsch.UserInfo;
 
 import javax.swing.*;
 import java.awt.*;
+
+import com.jcraft.jsch.*;
+
+import java.io.*;
 
 /**
  * Created by Administrator on 2017/11/17
@@ -15,11 +21,6 @@ import java.awt.*;
  * 2¡¢socket·½Ê½
  * .
  */
-import com.jcraft.jsch.*;
-
-import java.awt.*;
-import javax.swing.*;
-import java.io.*;
 
 public class DockerRemote {
     public static void main(String[] arg) {
@@ -41,18 +42,6 @@ public class DockerRemote {
 
             Session session = jsch.getSession(user, host, 22);
 
-      /*
-      String xhost="127.0.0.1";
-      int xport=0;
-      String display=JOptionPane.showInputDialog("Enter display name",
-                                                 xhost+":"+xport);
-      xhost=display.substring(0, display.indexOf(':'));
-      xport=Integer.parseInt(display.substring(display.indexOf(':')+1));
-      session.setX11Host(xhost);
-      session.setX11Port(xport+6000);
-      */
-
-            // username and password will be given via UserInfo interface.
             System.out.println("111");
             UserInfo ui = new MyUserInfo("123456");
             System.out.println("222");
@@ -66,16 +55,8 @@ public class DockerRemote {
             Channel channel = session.openChannel("exec");
             ((ChannelExec) channel).setCommand(command);
 
-            // X Forwarding
-            // channel.setXForwarding(true);
-
-            //channel.setInputStream(System.in);
             channel.setInputStream(null);
 
-            //channel.setOutputStream(System.out);
-
-            //FileOutputStream fos=new FileOutputStream("/tmp/stderr");
-            //((ChannelExec)channel).setErrStream(fos);
             ((ChannelExec) channel).setErrStream(System.err);
 
             InputStream in = channel.getInputStream();
@@ -106,7 +87,13 @@ public class DockerRemote {
     }
 
     public static class MyUserInfo implements UserInfo, UIKeyboardInteractive {
+        String passwd;
+
         public MyUserInfo(String passwd) {
+            this.passwd = passwd;
+        }
+
+        public void setPasswd(String passwd) {
             this.passwd = passwd;
         }
 
@@ -125,7 +112,6 @@ public class DockerRemote {
             return foo == 0;
         }
 
-        String passwd;
         JTextField passwordField = (JTextField) new JPasswordField(20);
 
         public String getPassphrase() {
